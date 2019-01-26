@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login</title>
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+
+<body>
+
+    <div class="content" style="height: 360px;">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="title">Reset Password</div>
+            <div class="input-field col s6">
+                <input name='old_password' id="password" type="password" class="validate" required>
+                <label for="password">Enter Password</label>
+            </div>
+            <div class="input-field col s6">
+                <input name='new_password' id="confirm_pass" type="password" class="validate" required>
+                <label for="confirm_pass">Confirm Password</label>
+            </div>
+            <button type="submit">Save password</button>
+        </form>
+    </div>
+
+</body>
+
+{% if conn %}
+<script>
+    var timer = setTimeout(function() {
+        window.location='{% url "user_home" %}'
+    }, 3000);
+</script>
+
+{% endif %}
+
+
+</html>
