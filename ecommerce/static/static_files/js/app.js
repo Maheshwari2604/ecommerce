@@ -66,5 +66,5 @@ $(function() {
             progressBar.text(progressBarDescription);
         });
     };
-    $("#exampleInputPassword1").bootstrapPasswordMeter({ minPasswordLength: 3 });
+    $("#exampleInputPassword1").bootstrapPasswordMeter({ minPasswordLength: 1 });
 });

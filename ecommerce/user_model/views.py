@@ -27,30 +27,43 @@ from django.template import RequestContext
 from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
 import hashlib
+from django.contrib.auth.hashers import make_password , check_password
 
 
 
 # Create your views here.
 def user_signup(request):
+    try:
+
     #csrfContext = RequestContext(request)
-    print "hey"
-    if request.method == 'POST':
-        form = SignupForm(request.POST or None)
-        if form.is_valid():
-            password = form.cleaned_data['password']
+        print "hey"
+        if request.method == 'POST':
+            #form = SignupForm(request.POST or None)
+            #if form.is_valid():
+            #password = form.cleaned_data['password']
+            password = request.POST['password']
             print password
             #form.password = make_password(password)
             #pswd = form.password
             #print pswd
-            user = form.save(commit=False)
-            user.is_active = False
+            #user = form.save(commit=False)
+            #user.is_active = False
             #user.save()
-            userobj = form.cleaned_data
-            username = userobj['username']
-            email = userobj['email']
+            #userobj = form.cleaned_data
+            #username = userobj['username']
+            #email = userobj['email']
             #raw_password = userobj['password']
+            user = register_model()
+            username = request.POST['username']
+            email = request.POST['email']
+            user.firstname = request.POST['first_name']    
+            user.lastname = request.POST['last_name']    
+            user.username = username   
+            user.password = make_password(password)    
+            user.email = email    
+            user.contact_no = request.POST['contact_no']  
             if not (register_model.objects.filter(username=username).exists() or register_model.objects.filter(email=email).exists()):
-                user.password = make_password(password)
+                #user.password = make_password(password)
                 pd = user.password
                 print "encrpted passwd is"
                 print pd
@@ -64,19 +77,28 @@ def user_signup(request):
                 'token': account_activation_token.make_token(user),
                 })
                 to_email = email
-                Email = EmailMessage(subject,message,to=[to_email])
-                Email.send()
-                return HttpResponse("Activation link is sent to an email, Please activate your account")
+                email = EmailMessage(subject,message,to=[to_email])
+                email.send()
+                #return HttpResponse("Activation link is sent to an email, Please activate your account")
                 #return render(request, 'S_W/confirmaton.html')
+                context = {
+                    "message": "Activation link is sent to an email, Please activate your account"
+                }
+                return render(request, 'user_model/register.html', context)
             else:
-                return render(request, 'user_model/error.html')    
-    else:
-        form = SignupForm()
-    return render(request, 'user_model/sign.html', {'form' : form})
+                context = {
+                'message': "Username or email exist please try something different"
+            }
+                return render(request,'user_model/register.html', context)
+        else:
+            return render(request, 'user_model/register.html')
+    except:
+        #return render(request, 'user_model/error.html')    
+        return render(request, 'user_model/register.html')
 
-def make_password(password):
-    hash = hashlib.md5(password).hexdigest()
-    return hash
+#def make_password(password):
+    #hash = hashlib.md5(password).hexdigest()
+    #return hash
 
 
 def activate(request, uidb64, token):
@@ -88,8 +110,16 @@ def activate(request, uidb64, token):
         uid = force_text(urlsafe_base64_decode(uidb64))
         #return HttpResponse(uid)
         user = register_model.objects.get(pk=uid)
+
+
+        if user:
+            user.verified = True
+            user.save()
+        else:
+            user.verified = False
+            user.delete()
         #return HttpResponse(user)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+    except(TypeError, ValueError, OverflowError, user.DoesNotExist):
         user = None
 
     if user is not None and account_activation_token.check_token(user, token):
@@ -103,9 +133,9 @@ def activate(request, uidb64, token):
         return HttpResponse('Activation link is invalid!')
 
 
-def check_password(password):
-    paswd = make_password(password)
-    return paswd
+#def check_password(password):
+#    paswd = make_password(password)
+#    return paswd
 
 
 def user_login(request):
@@ -119,11 +149,16 @@ def user_login(request):
             #user = register.objects.get(username=username)
             #return HttpResponse(user.password)
 
-            passwd = check_password(password)
-            print "here the login passwd is: "
-            print passwd
+            passw = register_model.objects.get(username=username)
+            passwordd = passw.password
+            print (passw.password)
+            passwd = check_password(password, passwordd)
+            print (passwd)
             #user = authenticate(username = username, password = password)
-            user = register_model.objects.get(username=username , password = passwd)
+            if passwd:
+                user = register_model.objects.get(username=username , password = passwordd)
+            else:
+                print "error"
             #return HttpResponse(user)
             #return HttpResponse(user.username)
             if user:
@@ -141,6 +176,7 @@ def user_login(request):
                 #uu = request.session['signupp_id']
                 #return HttpResponse(uu)
                 #request.session['email_confirmed'] = True 
+
                 return HttpResponseRedirect(reverse('user_home'))
             #else:
                 #context['error'] = "Error in Connection"
@@ -186,8 +222,12 @@ def password_reset(request):
             new_id = user.id
             print "session is"
             print new_id
-            return HttpResponse("Activation link is sent to an email, Please activate your account")
+            #return HttpResponse("Activation link is sent to an email, Please activate your account")
             #return render(request, 'S_W/confirmaton.html')
+            context = {
+                    "message": "Activation link is sent to an email, Please activate your account"
+                }
+            return render(request, 'user_model/password_reset.html', context)
 
         else:
             print "Something wents wrong"
@@ -310,29 +350,42 @@ def activate_password(request, uidb64, token):
 
 
 def user_home(request):
+    request.session.set_expiry(300)
+    try:
         #context = {}
         #if request.session.get('email_confirmed'):
-        request.session.set_expiry(300)
         try:
             new_id = request.session['user_id']
             print (new_id)
             print("user id is")
         except:
+            new_id = None
             HttpResponse("Error")
 
 
-        if new_id:
-            print ("in New_id")
-            print (new_id)
-            hello = request.session['user_id']
-            USER = register_model.objects.get(id = new_id)  
-            print (hello)
-            print ("user is below")
-            print (USER)
-            context = {'user':USER}
-            return render(request,'user_model/error.html',context)
-            #user = request.user
-            #return render(request,'S_W/error.html',context)
+        try:
+            if new_id is not None:
+                print ("in New_id")
+                print (new_id)
+                hello = request.session['user_id']
+                USER = register_model.objects.get(id = new_id)  
+                print (hello)
+                print ("user is below")
+                print (USER)
+                context = {'user':USER}
+                return render(request,'user_model/error.html',context)
+                #user = request.user
+                #return render(request,'S_W/error.html',context)
+            else:
+                context={
+                    "message": "please login your account"
+                }
+                return render(request,'user_model/error.html', context)
+        except:
+            HttpResponse("error")
 
-        else:
-           return render(request,'user_model/error.html')    
+    except:
+        context = {
+            "message" : "Something is wrong, please after sometime"
+        }
+        return render(request,'user_model/error.html', context)    
