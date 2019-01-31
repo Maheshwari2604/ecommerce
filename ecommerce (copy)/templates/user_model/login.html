@@ -1,0 +1,42 @@
+{% block contwnt %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login</title>
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+
+<body>
+
+    <div class="content">
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="title">Login</div>
+            <div class="input-field col s6">
+                <input name='username' id="email" type="text" class="validate" required>
+                <label for="email">Email/UserID</label>
+            </div>
+            <div class="input-field col s6">
+                <input name="password" id="password" type="password" class="validate" required>
+                <label for="password">Password</label>
+            </div>
+            <input type="checkbox" name="check" id="check" class="remCheck" />
+            <label for="check" class="remL"> Remember Me </label>
+            <span style="float:right;"><a href="{% url 'password_reset' %}" >Forgot Password?</a></span>
+            <button type="submit">Login</button>
+            <div class="already">Not registered with us yet? <a href="{% url 'user_signup' %}">Register Here</a></div>
+        </form>
+    </div>
+
+</body>
+{% endblock %}
+
+</html>
