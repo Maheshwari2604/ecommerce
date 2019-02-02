@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from .models import register_model
+from .models import register_model, address
 from django.contrib import admin
 
 # Register your models here.
@@ -17,3 +17,12 @@ class register(admin.ModelAdmin):
         model = register_model
 
 admin.site.register(register_model, register)
+
+class address_D(admin.ModelAdmin):
+    list_display = ['id', 'user', 'city', 'service_area' ,'local_address', 'pin', 'updated']
+    search_fields = ['user', 'city']
+    
+    class meta:
+        model = address
+
+admin.site.register(address, address_D)

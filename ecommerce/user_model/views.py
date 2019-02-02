@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from .models import register_model
 from django.shortcuts import render
 from .forms import SignupForm
+from products.views import home
 import hashlib
 from django.contrib import auth
 from django.contrib.auth import authenticate, login
@@ -373,19 +374,21 @@ def user_home(request):
                 print ("user is below")
                 print (USER)
                 context = {'user':USER}
-                return render(request,'user_model/error.html',context)
+                return HttpResponseRedirect(reverse('home'))
+                #return render(request,'user_model/error.html',context)
                 #user = request.user
                 #return render(request,'S_W/error.html',context)
             else:
                 context={
                     "message": "please login your account"
                 }
-                return render(request,'user_model/error.html', context)
+                return HttpResponseRedirect(reverse('home'))
+                #return render(request,'user_model/error.html', context)
         except:
-            HttpResponse("error")
+            return HttpResponseRedirect(reverse('home'))
 
     except:
         context = {
-            "message" : "Something is wrong, please after sometime"
+            "message" : "please login your account"
         }
-        return render(request,'user_model/error.html', context)    
+        return HttpResponseRedirect(reverse('home'))    

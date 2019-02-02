@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from user_model.views import user_signup, user_login, activate, user_home,password_reset, activate_password, password_reset_new
+from products.views import home
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -28,9 +29,11 @@ urlpatterns = [
         activate, name='activate'),
     url(r'^activate_password/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         activate_password, name='activate_password'),
-    url(r'^$', user_home , name='user_home'),
+    url(r'^home/', user_home , name='user_home'),
+    url(r'^$', home , name='home'),
     url(r'^password_reset/', password_reset , name='password_reset'),
     url(r'^password_reset_new/', password_reset_new, name='password_reset_new'),
+    
 ]
 
 if settings.DEBUG:
